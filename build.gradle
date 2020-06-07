@@ -1,0 +1,54 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "io.freefair.gradle:lombok-plugin:5.1.0"
+        classpath "io.qameta.allure:allure-gradle:2.8.1"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'io.qameta.allure'
+apply plugin: "io.freefair.lombok"
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+wrapper.gradleVersion = 6.5
+
+allure {
+    version = '2.13.2'
+    autoconfigure = true
+    aspectjweaver = false
+    allureJavaVersion = '2.13.2'
+}
+
+dependencies {
+    testCompile group: 'org.testng', name: 'testng', version: '6.8.13'
+    compile 'io.rest-assured:rest-assured:4.0.0'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.11.0'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.0'
+    testCompile group: 'com.revinate', name: 'assertj-json', version: '1.2.0'
+    testCompile("org.assertj:assertj-core:3.16.1")
+    compile group: 'io.qameta.allure', name: 'allure-rest-assured', version: '2.6.0'
+
+}
+
+task runTests(type: Test) {
+    useTestNG() {
+        def tag = System.getProperty('tag', 'NONE')
+        includeGroups tag
+        allure.setResultsDir(file("build/allure-results/${tag}"))
+        allure.setReportDir(file("build/reports/allure-report/${tag}"))
+        finalizedBy('allureReport')
+    }
+}
